@@ -1,30 +1,43 @@
 package com.sssakib.mobilerechargecloneapp
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.sssakib.fetchthousandscontact.R
 import kotlinx.android.synthetic.main.contact_list_items.view.*
 import java.util.ArrayList
 
-class ContactAdapter (items : List<Contact>, listener: OnItemClickListener):RecyclerView.Adapter<ContactAdapter.ViewHolder>(),
+class ContactAdapter (items : List<Contact>, listener: OnItemClickListener, ctx: Context):RecyclerView.Adapter<ContactAdapter.ViewHolder>(),
     Filterable {
 
     private lateinit var contactList: List<Contact>
     private lateinit var oldContactList: List<Contact>
 
     private val listener = listener
+    private val ctx = ctx
 
     inner class ViewHolder(v: View, listener: OnItemClickListener) : RecyclerView.ViewHolder(v){
 
         var name = v.contactNameTV
         var number = v.contactNumberTV
+        var uri = v.contactImage
         fun bind(data: Contact) {
             name.text = data.name
             number.text =  data.number
+            if ((data.uri==null)||data.uri.equals("")){
+                uri.setImageResource(R.drawable.ic_contact);
+            }else {
+                Glide.with(ctx)
+                    .load(data.uri)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(uri);
+            }
         }
 
     }

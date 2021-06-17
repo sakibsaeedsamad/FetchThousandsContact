@@ -1,6 +1,7 @@
 package com.sssakib.fetchthousandscontact
 
 import android.Manifest
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -11,7 +12,9 @@ import android.provider.ContactsContract
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sssakib.mobilerechargecloneapp.Contact
 import com.sssakib.mobilerechargecloneapp.ContactAdapter
@@ -30,8 +33,9 @@ class MainActivity : AppCompatActivity(), ContactAdapter.OnItemClickListener {
         setContentView(R.layout.activity_main)
         requestContactPermission()
 
+
         model = getContacts()
-        adapter = ContactAdapter(model!!, this)
+        adapter = ContactAdapter(model!!, this,this)
         adapter?.notifyDataSetChanged()
         contactRecyclerView.layoutManager = LinearLayoutManager(this)
         contactRecyclerView.adapter = adapter
@@ -182,7 +186,8 @@ class MainActivity : AppCompatActivity(), ContactAdapter.OnItemClickListener {
         val PROJECTION = arrayOf(
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Phone.NUMBER
+            ContactsContract.CommonDataKinds.Phone.NUMBER,
+            ContactsContract.CommonDataKinds.Phone.PHOTO_URI
         )
         val cursor: Cursor? = cr.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -196,11 +201,21 @@ class MainActivity : AppCompatActivity(), ContactAdapter.OnItemClickListener {
                 val nameIndex: Int = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
                 val numberIndex: Int =
                     cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                val uriIndex: Int = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
                 var name: String
                 var number: String
+                var uri: String
                 while (cursor.moveToNext()) {
                     name = cursor.getString(nameIndex)
                     number = cursor.getString(numberIndex)
+                    if (cursor.getString(uriIndex) == null){
+                        uri = ""
+                    }
+                    else
+                    {
+                        uri = cursor.getString(uriIndex)
+                    }
+
                     if (number.length == 11) {
                         no = number
                     }
@@ -210,7 +225,7 @@ class MainActivity : AppCompatActivity(), ContactAdapter.OnItemClickListener {
                         no = number
                     }
 
-                    val obj = Contact(0, name, no)
+                    val obj = Contact(0, name, no,uri)
 
                     contactList.add(obj)
                 }
@@ -219,6 +234,8 @@ class MainActivity : AppCompatActivity(), ContactAdapter.OnItemClickListener {
             }
         }
 
+
+        contactList.size
         return contactList
         cursor?.close()
     }
